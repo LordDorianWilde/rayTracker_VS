@@ -3,6 +3,7 @@
 #include "vecteur.h"
 #include <vector>
 #include "sphere.h"
+#include <random>
 #include <math.h>
 #include "rayon.h"
 #include <algorithm>
@@ -12,15 +13,16 @@ using namespace std;
 class Scene
 {
 public:
+	std::default_random_engine engine;
     Vecteur camera;
-    Vecteur lumiere;
     double intensity;
     std::vector<Sphere> spheres;
+	std::uniform_real_distribution<double> distribe;
 
-    Scene(Vecteur);
+    Scene(Sphere);
     void addSphere(Sphere);
     double intersecSphere(Sphere, Rayon);
-    bool objetBetweenHiddingLight(Sphere, Rayon);
+    bool objetBetweenHiddingLight(Sphere, Rayon, double);
 	Vecteur intensityLight(Sphere, Rayon, double, int);
 	Vecteur lightPixel(Rayon, int occ);
 	Vecteur lightPixel(Rayon);

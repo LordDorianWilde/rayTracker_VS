@@ -19,9 +19,12 @@ Vecteur::Vecteur()
 void Vecteur::normalize()
 {
     double n = sqrt(xyz[0]*xyz[0] + xyz[1]*xyz[1] + xyz[2]*xyz[2]);
-    xyz[0] /= n;
-    xyz[1] /= n;
-    xyz[2] /= n;
+	if (n != 0)
+	{
+		xyz[0] /= n;
+		xyz[1] /= n;
+		xyz[2] /= n;
+	}
 }
 
 double Vecteur::squareNorm()
@@ -52,6 +55,12 @@ Vecteur Vecteur::operator* (double a)
     return c;
 }
 
+Vecteur Vecteur::operator/ (double a)
+{
+	Vecteur c(xyz[0] / a, xyz[1] / a, xyz[2] / a);
+	return c;
+}
+
 Vecteur Vecteur::operator- (Vecteur b)
 {
     Vecteur c(xyz[0]-b[0], xyz[1]-b[1], xyz[2]-b[2]);
@@ -76,23 +85,25 @@ Vecteur Vecteur::refract(Vecteur n, double n1, double n2)
     }
     else
     {
+		int grd = 42;
         return Vecteur();
     }
 
 }
 
-Vecteur Vecteur::random(Vecteur n)
+Vecteur Vecteur::random(Vecteur n, double u, double v)
 {
-    double u = ((double) rand())/ RAND_MAX;
-    double v = ((double) rand())/ RAND_MAX;
-
-    double x = cos(2*pi*u)*sqrt(1-v);
-    double y = sin(2*pi*v)*sqrt(1-v);
+	double sqrt1v = sqrt(1 - v);
+    double x = cos(2*pi*u)*sqrt1v;
+    double y = sin(2*pi*u)*sqrt1v;
     double z = sqrt(v);
 
-    Vecteur r1(((double) rand())/ RAND_MAX, ((double) rand())/ RAND_MAX, ((double) rand())/ RAND_MAX);
-    r1.normalize();
-    Vecteur t1 = n.cross(r1);
+	Vecteur t1;
+	if (n[0] != 0 || n[1] != 0)
+		t1 = Vecteur(n[1], -n[0], 0);
+	else
+		t1 = Vecteur(0, n[2], -n[1]);
+	t1.normalize();
     Vecteur t2 = n.cross(t1);
     Vecteur c = t1*x + t2*y + n*z;
     return c;

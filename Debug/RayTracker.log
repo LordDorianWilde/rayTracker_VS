@@ -1,8 +1,13 @@
-﻿  RayTracker.cpp
-d:\project\visual studio\raytracker\raytracker\raytracker.cpp(64): warning C4244: '=' : conversion de 'double' en 'unsigned char', perte possible de données
-d:\project\visual studio\raytracker\raytracker\raytracker.cpp(65): warning C4244: '=' : conversion de 'double' en 'unsigned char', perte possible de données
-d:\project\visual studio\raytracker\raytracker\raytracker.cpp(66): warning C4244: '=' : conversion de 'double' en 'unsigned char', perte possible de données
+﻿  vecteur.cpp
+  sphere.cpp
+  scene.cpp
+  RayTracker.cpp
+d:\projet\raytracker_vs\raytracker.cpp(66): warning C4244: '=' : conversion de 'double' en 'unsigned char', perte possible de données
+d:\projet\raytracker_vs\raytracker.cpp(67): warning C4244: '=' : conversion de 'double' en 'unsigned char', perte possible de données
+d:\projet\raytracker_vs\raytracker.cpp(68): warning C4244: '=' : conversion de 'double' en 'unsigned char', perte possible de données
+  rayon.cpp
+  Génération de code en cours...
 LINK : warning LNK4075: ' /INCREMENTAL' ignoré à cause de la spécification '/PROFILE'
 rayon.obj : warning LNK4075: ' /EDITANDCONTINUE' ignoré à cause de la spécification '/OPT:LBR'
-  RayTracker.vcxproj -> D:\project\Visual Studio\RayTracker\Debug\RayTracker.exe
-  RayTracker.vcxproj -> D:\project\Visual Studio\RayTracker\Debug\RayTracker.pdb (Full PDB)
+  RayTracker.vcxproj -> D:\projet\rayTracker_VS\Debug\RayTracker.exe
+  RayTracker.vcxproj -> D:\projet\rayTracker_VS\Debug\RayTracker.pdb (Full PDB)

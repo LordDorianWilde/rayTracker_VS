@@ -1,6 +1,6 @@
 #include "sphere.h"
 
-Sphere::Sphere(Vecteur c, double r, double red , double green, double blue, bool mir, bool transp, double n)
+Sphere::Sphere(Vecteur c, double r, double red , double green, double blue, bool mir, bool transp, double n, double em)
 {
     centre = c;
     rayon = r;
@@ -10,15 +10,17 @@ Sphere::Sphere(Vecteur c, double r, double red , double green, double blue, bool
     mirroir = mir;
     transparent = transp;
     indiceRefract = n;
+	emission = em;
 }
 
-Sphere::Sphere(Vecteur c, double r, string couleur, bool mir, bool transp, double n)
+Sphere::Sphere(Vecteur c, double r, string couleur, bool mir, bool transp, double n, double em)
 {
     centre = c;
     rayon = r;
     mirroir = mir;
     transparent = transp;
     indiceRefract = n;
+	emission = em;
 
     if(couleur == "blue")
     {
