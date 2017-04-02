@@ -1,83 +1,30 @@
 #include "scene.h"
 
-Scene::Scene(Sphere lum)
+Scene::Scene(Objet* lum)
 {
-	addSphere(lum);
+	addObjet(lum);
     intensity = 70000;
 	engine = std::default_random_engine();
 	distribe = std::uniform_real_distribution<double>(0, 1);
 }
 
-void Scene::addSphere(Sphere s)
+void Scene::addObjet(Objet* s)
 {
     spheres.push_back(s);
 }
 
-double Scene::intersecSphere(Sphere s, Rayon r)
+Vecteur Scene::intensityLight(int index, Rayon r, vector<Vecteur> vect, int occ)
 {
-    double a = 1;
-    double b = (r.u*(r.camera-s.centre))*2;
-    double c = (r.camera-(s.centre)).squareNorm() - (s.rayon)*(s.rayon);
-    double delta = b*b - 4*a*c;
-    if(delta >= 0)
-    {
-        double t1 = (-b - sqrt(delta))/(2.*a);
-		if (t1 > 0)
-			return t1;
-		else
-		{
-			double t2 = (-b + sqrt(delta)) / (2.*a);
-			if (t2 > 0)
-				return t2;
-			else
-				return 1000000.;
-		}       
-    }
-    else
-        return 1000000.;
-}
-
-bool Scene::objetBetweenHiddingLight(Sphere s, Rayon r, double dist)
-{
-    double a = 1;
-    double d = sqrt((spheres[0].centre-r.camera).squareNorm());
-    double b = (r.u*(r.camera-s.centre))*2;
-    double c = (r.camera-(s.centre)).squareNorm() - (s.rayon)*(s.rayon);
-    double delta = b*b - 4*a*c;
-    if(delta >= 0)
-    {
-        double t1 = (-b - sqrt(delta))/(2.*a);
-        if(t1 > 0 && t1*t1 < dist)
-            return true;
-		else
-		{
-			double t2 = (-b + sqrt(delta)) / (2.*a);
-			if (t2 > 0 && t2*t2 < dist)
-				return true;
-			return false;
-		}
-    }
-	return false;
-
-}
-
-Vecteur Scene::intensityLight(Sphere s, Rayon r, double t1, int occ)
-{
-    if(occ == 5)
-    {
-        Vecteur inten(0., 0., 0.);
-        return inten;
-    }
-	else if (s.emission > 0.1)
+    if (spheres[index]->getEmission() > 0.1)
 	{
-		double a = s.emission;
+        double a = spheres[index]->getEmission();
 		Vecteur inten(a, a, a);
 		return inten;
 	}
-    else if(s.mirroir)
+    else if(spheres[index]->getMirroir() == true)
     {
-        Vecteur p = (r.camera+(r.u*t1));
-        Vecteur n = (p - s.centre);
+        Vecteur p = vect[0];
+        Vecteur n = vect[1];
         n.normalize();
         p = p + n*0.001;
         Vecteur u1 = r.u - (n*(r.u*n))*2;
@@ -85,16 +32,16 @@ Vecteur Scene::intensityLight(Sphere s, Rayon r, double t1, int occ)
         Rayon r1(p, u1);
         return lightPixel(r1, occ +1);
     }
-    else if(s.transparent)
+    else if(spheres[index]->getTransparent() == true)
     {
-        Vecteur p = (r.camera+(r.u*t1));
-        Vecteur n = (p - s.centre);
+        Vecteur p = vect[0];
+        Vecteur n = vect[1];
         n.normalize();
 
         if(n*r.u < 0)
         {
             p = p - n*0.0001;
-            Vecteur v = (r.u).refract(n, 1, s.indiceRefract);
+            Vecteur v = (r.u).refract(n, 1, spheres[index]->getIndiceRefract());
             v.normalize();
             if(v.squareNorm() > 0)
             {
@@ -110,7 +57,7 @@ Vecteur Scene::intensityLight(Sphere s, Rayon r, double t1, int occ)
         else
         {
             p = p + n*0.0001;
-            Vecteur v = (r.u).refract(n*(-1), s.indiceRefract, 1);
+            Vecteur v = (r.u).refract(n*(-1), spheres[index]->getIndiceRefract(), 1);
             v.normalize();
             if(v.squareNorm() > 0)
             {
@@ -127,15 +74,16 @@ Vecteur Scene::intensityLight(Sphere s, Rayon r, double t1, int occ)
     }
     else
     {
-        Vecteur p = (r.camera+(r.u*t1));
-        Vecteur n = (p - s.centre);
+        Vecteur p = vect[0];
+        Vecteur n = vect[1];
 		n.normalize();
-		Vecteur l = spheres[0].centre;
-		Vecteur lp = p - l;
+        Vecteur lp = spheres[0]->normal(p)*(-1);
         lp.normalize();
 		Vecteur lum_dir;
 		lum_dir = lum_dir.random(lp, distribe(engine), distribe(engine));
-		Vecteur xp = l + lum_dir*(spheres[0].rayon) - p;
+        Rayon lumiere = Rayon(spheres[0]->getCentre(), lum_dir);
+        Vecteur l = spheres[0]->intersect(lumiere)[0];
+		Vecteur xp = l - p;
 		double distLum = xp.squareNorm();
 		xp.normalize();
 		double cosTheta = n*(lp*(-1));
@@ -143,11 +91,13 @@ Vecteur Scene::intensityLight(Sphere s, Rayon r, double t1, int occ)
 		double pdf = lp*lum_dir;
 
 		
-		double a = max(0., min(255., spheres[0].emission*cosTheta*cosThetaPrime / (distLum*pdf)));
+        double a = max(0., min(255., spheres[0]->getEmission()*cosTheta*cosThetaPrime / (distLum*pdf)));
 
         for(unsigned int i = 1; i<spheres.size(); i++)
         {
-            if(spheres[i] != s && objetBetweenHiddingLight(spheres[i], Rayon(p + n*0.002, xp), distLum))
+			vector<Vecteur> inter = spheres[i]->intersect(Rayon(p + n*0.002, xp));
+			double dist = (inter[0] - p).squareNorm();
+			if (!(inter[1] == Vecteur()) && i != index && dist < distLum)
             {
                 a = 0.;
             }
@@ -158,12 +108,11 @@ Vecteur Scene::intensityLight(Sphere s, Rayon r, double t1, int occ)
         random_dir = random_dir.random(n, distribe(engine), distribe(engine));
         Rayon r1(p + n*0.001, random_dir);
 		Vecteur reflexion = lightPixel(r1, occ +1);
-		reflexion[0] = max(0., min(255., reflexion[0]));
-		reflexion[1] = max(0., min(255., reflexion[1]));
-		reflexion[2] = max(0., min(255., reflexion[2]));
-        for(int j = 0; j<3; j++)
+		
+		for(int j = 0; j<3; j++)
         {
-            inten[j] = inten[j]* s.color[j] + reflexion[j]*s.color[j]/3.1415;
+            inten[j] = inten[j]* spheres[index]->getColor(j) + reflexion[j]*spheres[index]->getColor(j)/3.1415;
+			inten[j] = max(0., min(255., inten[j]));
         }
 
         return inten;
@@ -173,23 +122,33 @@ Vecteur Scene::intensityLight(Sphere s, Rayon r, double t1, int occ)
 
 Vecteur Scene::lightPixel(Rayon u, int occ)
 {
-    double d = 10000.;
-    Vecteur inten(0.,0.,0.);
-    int indexMin = -1;
-    for(unsigned int i = 0; i<spheres.size(); i++)
+    if(occ == 4)
     {
-        double a = intersecSphere(spheres[i], u);
-        if( a < d )
+        Vecteur inten(0., 0., 0.);
+        return inten;
+    }
+    else
+    {
+        double d = 100000.;
+        Vecteur inten(0.,0.,0.);
+        vector<Vecteur> vect = { Vecteur(), Vecteur() };
+        int indexMin = -1;
+        for(unsigned int i = 0; i<spheres.size(); i++)
         {
-            indexMin = i;
-            d = a; 
+            vector<Vecteur> a = spheres[i]->intersect(u);
+            if(!(a[1] == Vecteur() ) && (u.camera - a[0]).squareNorm() < d )
+            {
+                indexMin = i;
+                vect = a;
+                d = (u.camera - a[0]).squareNorm();
+            }
         }
+        if(indexMin > -1)
+        {
+            inten = intensityLight(indexMin, u, vect, occ);
+        }
+        return inten;
     }
-    if(indexMin > -1)
-    {
-        inten = intensityLight(spheres[indexMin], u, d, occ);
-    }
-	return inten;
 }
 
 Vecteur Scene::lightPixel(Rayon u)

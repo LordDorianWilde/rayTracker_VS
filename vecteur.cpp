@@ -67,6 +67,12 @@ Vecteur Vecteur::operator- (Vecteur b)
     return c;
 }
 
+bool Vecteur::operator== (Vecteur b)
+{
+	bool a = xyz[0] == b[0] && xyz[1] == b[1] && xyz[2] == b[2];
+	return a;
+}
+
 Vecteur Vecteur::cross (Vecteur b)
 {
     Vecteur c(xyz[1]*b[2]-b[1]*xyz[2], xyz[2]*b[0]-b[2]*xyz[0], xyz[0]*b[1]-b[0]*xyz[1]);
@@ -85,7 +91,6 @@ Vecteur Vecteur::refract(Vecteur n, double n1, double n2)
     }
     else
     {
-		int grd = 42;
         return Vecteur();
     }
 

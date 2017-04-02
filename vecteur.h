@@ -23,6 +23,7 @@ public:
     double operator* (Vecteur);
     Vecteur operator* (double);
     Vecteur operator- (Vecteur);
+	bool operator== (Vecteur b);
 	Vecteur operator/ (double);
     Vecteur refract(Vecteur, double, double);
 	Vecteur random(Vecteur, double, double);

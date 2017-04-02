@@ -1,8 +1,9 @@
-// RayTracker.cpp : définit le point d'entrée pour l'application console.
+// RayTracker.cpp : définit le point d'entrée pour l'application console.
 //
 #include <iostream>
 #include <stdlib.h>
 #include "CImg.h"
+#include "Mesh.h"
 #include <time.h>
 #include <omp.h>
 #include <math.h>
@@ -18,54 +19,63 @@ using namespace std;
 
 void createImage()
 {
+	string meshName;
+	cout << "Nom du mesh à utiliser : ";
+	cin >> meshName;
+	cout << endl;
 	time_t start;
 	time(&start);
 	int W = 1024;
 	int H = 1024;
 	vector<unsigned char> pixels(W*H * 3, 0);
 	double alpha = 3.14 / 2.;
-	int nbRayon = 200;
+	int nbRayon = 1;
 
 	Vecteur C(0, -20, 55);
-	
-	Sphere lum(Vecteur(-10, 0, 20), 1.5, "white", false, false, 0., 40000.);
-	Scene scene(lum);
 
-	Sphere s(Vecteur(0, -25, 10), 10., "white", false, true, 1.3, 0.);
-	scene.addSphere(s);
+
+
+	Sphere lum(Vecteur(-10, 0, 30), 0.5, "white", false, false, 0., 50000.);
+	Scene scene(&lum);
+
+	Mesh mesh("../" + meshName + ".obj", 10.0, Vecteur(0, 0, 0), 1.0, 1.0, 1.0, false, false, 1.0, 0.);
+	scene.addObjet(&mesh);
+
+	cout << "Boxing fait." << endl;
+
+	//Sphere s(Vecteur(0, -25, 10), 10., "white", false, false, 1.3, 0.);
+	//scene.addObjet(&s);
 	Sphere murGauche(Vecteur(-1000, 0, 0), 960, "red", false, false, 0, 0.);
-	scene.addSphere(murGauche);
+	scene.addObjet(&murGauche);
 	Sphere murDroite(Vecteur(1000, 0, 0), 960, "blue", false, false, 0., 0.);
-	scene.addSphere(murDroite);
+	scene.addObjet(&murDroite);
 	Sphere murFond(Vecteur(0, 0, -1000), 960, "green", false, false, 0., 0.);
-	scene.addSphere(murFond);
+	scene.addObjet(&murFond);
 	Sphere murDerriere(Vecteur(0, 0, 1000), 940, "white", false, false, 0., 0.);
-	scene.addSphere(murDerriere);
+	scene.addObjet(&murDerriere);
 	Sphere sol(Vecteur(0, -1000, 0), 960, "white", false, false, 0., 0.);
-	scene.addSphere(sol);
+	scene.addObjet(&sol);
+
+	cout << "scene faite." << endl;
 
 	omp_set_num_threads(8);
-	std::default_random_engine engine = std::default_random_engine();
-	std::uniform_real_distribution<double> distribe = std::uniform_real_distribution<double>(0, 1);
 
 	#pragma omp parallel for schedule(dynamic,1)
 	for (int i = 0; i<W; i++)
 	{
 		for (int j = 0; j<H; j++)
 		{
-			/*double x = distribe(engine);
-			double y = distribe(engine);
-			double R = sqrt(-2 * log(x));
-			double w = R*cos(2 * 3.1416*y)*0.25;
-			double v = R*sin(2 * 3.1416*y)*0.25;*/
-
-			//Vecteur u(j - H / 2. + v - 0.25, W / 2. - i + w - 0.25, -W / (2.*tan(alpha / 2.)));
-			Vecteur u(j - H / 2., W / 2. - i , -W / (2.*tan(alpha / 2.)));
+			Vecteur u(j - H / 2., W / 2. - i, -W / (2.*tan(alpha / 2.)));
 			u.normalize();
 			pixels[i*W + j] = 0;
 			pixels[i*W + j + H*W] = 0;
 			pixels[i*W + j + 2 * H*W] = 0;
 			Vecteur inten(0., 0., 0.);
+			if (i == 170 && j == 500)
+			{
+				int grd = 42;
+			}
+
 
 			Rayon r(C, u);
 			for (int k = 0; k<nbRayon; k++)

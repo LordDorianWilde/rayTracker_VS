@@ -157,13 +157,19 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Boite.h" />
     <ClInclude Include="CImg.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Objet.h" />
     <ClInclude Include="rayon.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="vecteur.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Boite.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Objet.cpp" />
     <ClCompile Include="rayon.cpp" />
     <ClCompile Include="RayTracker.cpp" />
     <ClCompile Include="scene.cpp" />
